@@ -9,6 +9,8 @@ import com.example.order.repos.OrderRepo;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
+import java.security.InvalidParameterException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,24 +35,20 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderDTO orderById(@PathVariable Integer id) {
-        return orderRepo.getOne(id).toDTO();
+        return orderRepo.findById(id).orElseThrow(InvalidParameterException::new).toDTO();
     }
 
     @PostMapping("/addition")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDTO create(
-            @RequestParam(required = false) String id,
-            @RequestBody ItemAdditionParametersDTO item,
-            @RequestParam String username) {
+    public OrderDTO create(@RequestParam(required = false) String id, @RequestParam String username, @RequestBody ItemAdditionParametersDTO item) {
         try {
             int idOrder = Integer.parseInt(id);
-            return orderRepo.save(orderRepo
-                    .getOne(idOrder)
-                    .addItem(item.toOrderItem()))
-                    .toDTO();
+            return orderRepo.save(
+                    orderRepo.findById(idOrder).orElseThrow(InvalidParameterException::new)
+                        .addItem(item.toOrderItem()))
+                        .toDTO();
 
         } catch (NumberFormatException e) {
-            System.out.println("dwqwdqwd");
             return orderRepo
                     .save(new Order(username, item.toOrderItem()))
                     .toDTO();
@@ -58,13 +56,15 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/cost")
-    public OrderDTO totalCost(@RequestParam Integer id) {
+    @GetMapping("/cost/{id}")
+    public OrderDTO totalCost(@PathVariable Integer id) {
         return new OrderDTO(id, orderRepo.getOne(id).getTotalCost());
     }
 
 
 
+
+    //DEPRECATED МЕТОДЫ НИЖЕ
     @GetMapping("/name")
     public String name(@RequestParam(name = "name", required = false, defaultValue = "World") String name) {
         return name;

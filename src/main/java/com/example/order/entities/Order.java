@@ -1,5 +1,6 @@
 package com.example.order.entities;
 
+import com.example.order.dto.OrderDTO;
 import com.example.order.enums.OrderStatus;
 
 import javax.persistence.*;
@@ -8,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Entity
-@Table(name="orders")
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,6 +35,12 @@ public class Order {
         this.totalAmount = totalAmount;
         this.userName = userName;
         this.orderItems = Stream.of(items).collect(Collectors.toSet());
+        updateTotalAmount();
+        updateTotalCost();
+    }
+
+    public Order(String userName, OrderItem... items) {
+        this(0, 0, userName, items);
     }
 
     public OrderStatus getStatus() {
@@ -84,11 +91,36 @@ public class Order {
         this.idOrder = idOrder;
     }
 
+    public void updateTotalCost() {
+        setTotalCost(
+                orderItems
+                        .stream()
+                        .reduce(0.0,
+                                (identity, item) -> identity + item.getPrice() * item.getAmount(),
+                                Double::sum));
+    }
+
+    public void updateTotalAmount() {
+        setTotalAmount(
+                orderItems
+                        .stream()
+                        .reduce(0,
+                                (identity, item) -> identity + item.getAmount(),
+                                Integer::sum));
+    }
+
     public Order addItem(OrderItem oi) {
-        if (orderItems.contains(oi))
-            orderItems.stream().filter(data -> data.equals(oi)).findFirst().orElse(new OrderItem()).addOne(); //Переписать orElse с обработкой ошибок
+        if (orderItems.contains(oi)){
+            orderItems.stream().filter(data -> data.equals(oi)).findFirst().orElse(new OrderItem()).add(oi.getAmount()); //Переписать orElse с обработкой ошибок
+            updateTotalCost();
+            updateTotalAmount();
+        }
         else
             orderItems.add(oi);
         return this;
+    }
+
+    public OrderDTO toDTO() {
+        return new OrderDTO(this);
     }
 }

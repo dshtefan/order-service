@@ -58,6 +58,11 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/cost")
+    public OrderDTO totalCost(@RequestParam Integer id) {
+        return new OrderDTO(id, orderRepo.getOne(id).getTotalCost());
+    }
+
 
 
     @GetMapping("/name")

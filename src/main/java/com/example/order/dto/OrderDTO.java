@@ -21,6 +21,11 @@ public class OrderDTO {
         this.idOrder = idOrder;
     }
 
+    public OrderDTO(int idOrder, double totalCost){
+        this.idOrder = idOrder;
+        this.totalCost = totalCost;
+    }
+
     public OrderDTO(int idOrder, OrderStatus status){
         this.idOrder = idOrder;
         this.status = status;

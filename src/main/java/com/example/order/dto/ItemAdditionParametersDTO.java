@@ -3,23 +3,23 @@ package com.example.order.dto;
 import com.example.order.entities.OrderItem;
 
 public class ItemAdditionParametersDTO {
-    private int idItem; //STRING !!!!!!!!!!!
+    private String idItem;
     private String name;
     private int amount;
     private double price;
 
-    public ItemAdditionParametersDTO(int idItem, String name, int amount, double price) {
+    public ItemAdditionParametersDTO(String idItem, String name, int amount, double price) {
         this.idItem = idItem;
         this.name = name;
         this.amount = amount;
         this.price = price;
     }
 
-    public int getIdItem() {
+    public String getIdItem() {
         return idItem;
     }
 
-    public void setIdItem(int idItem) {
+    public void setIdItem(String idItem) {
         this.idItem = idItem;
     }
 

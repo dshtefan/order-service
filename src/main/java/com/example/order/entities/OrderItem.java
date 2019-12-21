@@ -9,7 +9,7 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idOrderItem;
     @Column(name = "id_item")
-    private int idItem;//STRING!!!!!!!!!!!!!!!!
+    private String idItem;
     @Column(name = "amount")
     private int amount;
     @Column(name = "price")
@@ -20,7 +20,7 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(int idItem, int amount, double price, String name) {
+    public OrderItem(String idItem, int amount, double price, String name) {
         this.idItem = idItem;
         this.amount = amount;
         this.price = price;
@@ -43,11 +43,11 @@ public class OrderItem {
         this.idOrderItem = id;
     }
 
-    public int getIdItem() {
+    public String getIdItem() {
         return idItem;
     }
 
-    public void setIdItem(int idItem) {
+    public void setIdItem(String idItem) {
         this.idItem = idItem;
     }
 
@@ -90,11 +90,11 @@ public class OrderItem {
 
         OrderItem orderItem = (OrderItem) o;
 
-        return this.idItem == orderItem.idItem;
+        return this.idItem.equals(orderItem.idItem);
     }
 
     @Override
     public int hashCode() {
-        return idItem;
+        return idItem.hashCode();
     }
 }

@@ -3,7 +3,7 @@ package com.example.order.dto;
 import com.example.order.entities.OrderItem;
 
 public class ItemAdditionParametersDTO {
-    private int idItem;
+    private int idItem; //STRING !!!!!!!!!!!
     private String name;
     private int amount;
     private double price;

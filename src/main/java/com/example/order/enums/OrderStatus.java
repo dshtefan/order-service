@@ -6,7 +6,7 @@ public enum OrderStatus {
     COLLECTING {
         @Override
         public EnumSet<OrderStatus> nextState(){
-            return EnumSet.of(OrderStatus.PAYED, OrderStatus.FAILED);
+            return EnumSet.of(OrderStatus.PAYED, OrderStatus.FAILED, OrderStatus.CANCELLED);
         }
     },
     PAYED {
@@ -36,7 +36,7 @@ public enum OrderStatus {
     CANCELLED {
         @Override
         public EnumSet<OrderStatus> nextState() {
-            return EnumSet.of(this);
+            return EnumSet.of(OrderStatus.PAYED);
         }
     };
 

@@ -111,7 +111,7 @@ public class Order {
 
     public Order addItem(OrderItem oi) {
         if (orderItems.contains(oi)){
-            orderItems.stream().filter(data -> data.equals(oi)).findFirst().orElse(new OrderItem()).add(oi.getAmount()); //Переписать orElse с обработкой ошибок
+            orderItems.stream().filter(data -> data.equals(oi)).findFirst().orElse(oi).add(oi.getAmount());
             updateTotalCost();
             updateTotalAmount();
         }

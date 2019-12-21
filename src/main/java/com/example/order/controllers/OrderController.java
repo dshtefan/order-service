@@ -2,70 +2,68 @@ package com.example.order.controllers;
 
 import com.example.order.dto.ItemAdditionParametersDTO;
 import com.example.order.dto.OrderDTO;
-import com.example.order.entities.Order;
-import com.example.order.entities.OrderItem;
-import com.example.order.repos.OrderItemRepo;
-import com.example.order.repos.OrderRepo;
+import com.example.order.services.OrderService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
 import java.security.InvalidParameterException;
-import java.util.LinkedList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
 
-    private final OrderRepo orderRepo;
-    private final OrderItemRepo orderItemRepo;
+    private final OrderService service;
 
-    public OrderController(OrderRepo orderRepo, OrderItemRepo orderItemRepo) {
-        this.orderRepo = orderRepo;
-        this.orderItemRepo = orderItemRepo;
+    public OrderController(OrderService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<OrderDTO> list() {
-        List<OrderDTO> result = new LinkedList<>();
-        orderRepo.findAll().forEach(order -> result.add(order.toDTO()));
-        return result;
+    public ResponseEntity<List<OrderDTO>> list() {
+        return ResponseEntity.ok().body(service.list());
     }
 
     @GetMapping("/{id}")
-    public OrderDTO orderById(@PathVariable Integer id) {
-        return orderRepo.findById(id).orElseThrow(InvalidParameterException::new).toDTO();
+    public ResponseEntity<OrderDTO> orderById(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok().body(service.orderById(id));
+        } catch (InvalidParameterException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/addition")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDTO create(@RequestParam(required = false) String id, @RequestParam String username, @RequestBody ItemAdditionParametersDTO item) {
+    public ResponseEntity<OrderDTO> create(@RequestParam(required = false) String id, @RequestParam String username, @RequestBody ItemAdditionParametersDTO item) {
         try {
-            int idOrder = Integer.parseInt(id);
-            return orderRepo.save(
-                    orderRepo.findById(idOrder).orElseThrow(InvalidParameterException::new)
-                        .addItem(item.toOrderItem()))
-                        .toDTO();
-
-        } catch (NumberFormatException e) {
-            return orderRepo
-                    .save(new Order(username, item.toOrderItem()))
-                    .toDTO();
-
+            return ResponseEntity.ok().body(service.create(id, username, item));
+        } catch (InvalidParameterException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/cost/{id}")
-    public OrderDTO totalCost(@PathVariable Integer id) {
-        return new OrderDTO(id, orderRepo.getOne(id).getTotalCost());
+    public ResponseEntity<OrderDTO> totalCost(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(service.totalCost(id));
+    }
+
+    @PutMapping("{orderID}/status/{status}")
+    public ResponseEntity<OrderDTO> changeStatus (@PathVariable Integer orderID, @PathVariable String status) {
+        try {
+            return ResponseEntity.ok().body(service.changeStatus(orderID, status));
+        } catch (InvalidParameterException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
 
 
-
     //DEPRECATED МЕТОДЫ НИЖЕ
-    @GetMapping("/name")
+    /*@GetMapping("/name")
     public String name(@RequestParam(name = "name", required = false, defaultValue = "World") String name) {
         return name;
     }
@@ -105,5 +103,5 @@ public class OrderController {
         orderRepo.save(orderRepo.findAll().get(1).addItem(oi));
         orderRepo.save(orderRepo.findAll().get(0).addItem(oi));
         return print();
-    }
+    }*/
 }

@@ -9,7 +9,7 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idOrderItem;
     @Column(name = "id_item")
-    private int idItem;
+    private int idItem;//STRING!!!!!!!!!!!!!!!!
     @Column(name = "amount")
     private int amount;
     @Column(name = "price")

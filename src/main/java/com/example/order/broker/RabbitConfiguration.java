@@ -5,15 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQ {
+public class RabbitConfiguration {
     @Bean
     public Declarables exchanges() {
         DirectExchange statusQueue = new DirectExchange("StatusQueue", true, false);
         DirectExchange warehouseQueueReserveItems = new DirectExchange("WarehouseQueueReserveItems", true, false);
         DirectExchange warehouseQueueReserveItemsCancelled = new DirectExchange("WarehouseQueueReserveItemsCancelled", true, false);
-        Queue paymentStatus = new Queue("paymentStatus", true);
-        Queue warehouseItem = new Queue("warehouseItem", true);
-        Queue warehouseCancelled = new Queue("warehouseCancelled", true);
+        Queue paymentStatus = new Queue("paymentStatus", false);
+        Queue warehouseItem = new Queue("warehouseItem", false);
+        Queue warehouseCancelled = new Queue("warehouseCancelled", false);
 
         return new Declarables(
                 paymentStatus,

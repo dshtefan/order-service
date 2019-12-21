@@ -58,7 +58,7 @@ public class OrderService {
     }
 
 
-    public OrderDTO create(String id, String username, ItemAdditionParametersDTO item) {
+    public OrderDTO addItem(String id, String username, ItemAdditionParametersDTO item) {
         try {
             int idOrder = Integer.parseInt(id);
             return orderRepo.save(
@@ -74,9 +74,9 @@ public class OrderService {
         }
     }
 
-    public OrderDTO totalCost(Integer id) {
-        return new OrderDTO(id, orderRepo.getOne(id).getTotalCost());
-    }
+//    public OrderDTO totalCost(Integer id) {
+//        return new OrderDTO(id, orderRepo.getOne(id).getTotalCost());
+//    }
 
     @Transactional
     public OrderDTO changeStatus (Integer orderID, String status) throws Exception{

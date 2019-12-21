@@ -15,6 +15,7 @@ import javax.naming.directory.InvalidAttributeValueException;
 import java.security.InvalidParameterException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class OrderService {
@@ -29,16 +30,21 @@ public class OrderService {
 
     @RabbitListener(queues = {"paymentStatus"})
     public void receiveMessageFromPayment(String message) throws InvalidAttributeValueException {
-
+        System.out.println(message);
     }
 
-    @RabbitListener(queues = {"warehouseItem"})
+    @RabbitListener(queues = {"WarehouseQueueReserveItemsCancelled"})
     public void receiveMessageFromWarehouse(String message) throws InvalidAttributeValueException {
+        /*JSONObject json = new JSONObject(message);
+        Map<String, Object> map = json.toMap();
+        String ordstat = (String) map.get("status");
+        int orderID = (Integer) map.get("orderID");
+        changeStatus(orderID, ordstat);*/
         System.out.println(message);
     }
 
     public List<OrderDTO> list() {
-        /*JSONObject jo = new JSONObject();
+        JSONObject jo = new JSONObject();
         JSONObject jo2 = new JSONObject();
         jo.put("id", "1");
         jo.put("username", "Denis");
@@ -47,7 +53,7 @@ public class OrderService {
         jo2.put("amount", 5);
         jo2.put("idItem", 1231.34);
         jo.put("item", jo2);
-        rabbitTemplate.convertAndSend("WarehouseQueueReserveItems", "whKey", jo.toString());*/
+        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange2", "whKey", jo.toString());
         List<OrderDTO> result = new LinkedList<>();
         orderRepo.findAll().forEach(order -> result.add(order.toDTO()));
         return result;

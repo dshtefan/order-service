@@ -8,22 +8,22 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfiguration {
     @Bean
     public Declarables exchanges() {
-        DirectExchange statusQueue = new DirectExchange("StatusQueue", true, false);
-        DirectExchange warehouseQueueReserveItems = new DirectExchange("WarehouseQueueReserveItems", true, false);
-        DirectExchange warehouseQueueReserveItemsCancelled = new DirectExchange("WarehouseQueueReserveItemsCancelled", true, false);
+//        DirectExchange statusQueue = new DirectExchange("StatusQueue");
+//        DirectExchange warehouseQueueReserveItems = new DirectExchange("WarehouseQueueReserveItems");
+        DirectExchange warehouseQueueReserveItemsCancelled = new DirectExchange("WarehouseReserveItemsExchange2", true, false);
         Queue paymentStatus = new Queue("paymentStatus", false);
-        Queue warehouseItem = new Queue("warehouseItem", false);
-        Queue warehouseCancelled = new Queue("warehouseCancelled", false);
+        Queue warehouseItem = new Queue("WarehouseQueueReserveItems", false);
+        Queue warehouseCancelled = new Queue("WarehouseQueueReserveItemsCancelled", false);
 
         return new Declarables(
                 paymentStatus,
                 warehouseItem,
                 warehouseCancelled,
-                statusQueue,
-                warehouseQueueReserveItems,
+//                statusQueue,
+//                warehouseQueueReserveItems,
                 warehouseQueueReserveItemsCancelled,
-                BindingBuilder.bind(paymentStatus).to(statusQueue).with("pmKey"),
-                BindingBuilder.bind(warehouseItem).to(warehouseQueueReserveItems).with("whKey"),
+//                BindingBuilder.bind(paymentStatus).to(statusQueue).with("pmKey"),
+//                BindingBuilder.bind(warehouseItem).to(warehouseQueueReserveItems).with("whKey"),
                 BindingBuilder.bind(warehouseCancelled).to(warehouseQueueReserveItemsCancelled).with("whcKey")
         );
     }

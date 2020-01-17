@@ -28,10 +28,11 @@ public class OrderService {
     }
 
     private void addItemCancelling(ItemAdditionParametersDTO item) {
-        JSONObject json = new JSONObject();
+        System.out.println("addItemCancelling");
+        net.minidev.json.JSONObject json = new net.minidev.json.JSONObject();
         json.put("id", item.getIdItem());
         json.put("amount", item.getAmount());
-        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange2", "whcKey", json.toString());
+        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange2", "whcKey", json);
     }
 
     @RabbitListener(queues = {"paymentStatus"})
@@ -42,7 +43,7 @@ public class OrderService {
             JSONObject json = new JSONObject(message);
             Integer idOrder = json.getInt("idOrder");
             String status = json.getString("cartAuth");
-            if (status.equals("AUTHORIZED")) {
+            if (status.toUpperCase().equals("AUTHORIZED")) {
                 System.out.println(idOrder + " " + "PAYED");
                 changeStatus(idOrder, "PAYED");
             } else {
@@ -96,7 +97,7 @@ public class OrderService {
             System.out.println(orderRepo.findById(1).orElse(new Order()));
             return orderRepo.save(
                     orderRepo.findById(idOrder).orElseThrow(InvalidParameterException::new).addItem(item.toOrderItem())).toDTO();
-        } catch (NumberFormatException e) {
+        } catch(NullPointerException | NumberFormatException e) {
             return orderRepo.save(new Order(username, item.toOrderItem())).toDTO();
         }
     }

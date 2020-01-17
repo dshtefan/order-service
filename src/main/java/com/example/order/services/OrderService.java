@@ -11,7 +11,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.directory.InvalidAttributeValueException;
 import java.security.InvalidParameterException;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,32 +27,59 @@ public class OrderService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    @RabbitListener(queues = {"paymentStatus"})
-    public void receiveMessageFromPayment(String message) throws InvalidAttributeValueException {
-        System.out.println(message);
+    private void addItemCancelling(ItemAdditionParametersDTO item) {
+        JSONObject json = new JSONObject();
+        json.put("id", item.getIdItem());
+        json.put("amount", item.getAmount());
+        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange2", "whcKey", json.toString());
     }
 
-    @RabbitListener(queues = {"WarehouseQueueReserveItemsCancelled"})
-    public void receiveMessageFromWarehouse(String message) throws InvalidAttributeValueException {
-        /*JSONObject json = new JSONObject(message);
-        Map<String, Object> map = json.toMap();
-        String ordstat = (String) map.get("status");
-        int orderID = (Integer) map.get("orderID");
-        changeStatus(orderID, ordstat);*/
-        System.out.println(message);
+    @RabbitListener(queues = {"paymentStatus"})
+    @Transactional
+    public void receiveMessageFromPayment(String message) {
+        try {
+            System.out.println(message);
+            JSONObject json = new JSONObject(message);
+            Integer idOrder = json.getInt("idOrder");
+            String status = json.getString("cartAuth");
+            if (status.equals("AUTHORIZED")) {
+                System.out.println(idOrder + " " + "PAYED");
+                changeStatus(idOrder, "PAYED");
+            } else {
+                System.out.println(idOrder + " " + "FAILED");
+                changeStatus(idOrder, "FAILED");
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @RabbitListener(queues = {"WarehouseQueueReserveItems"})
+    @Transactional
+    public void receiveMessageFromWarehouse(String message) {
+        try {
+            System.out.println(message);
+            JSONObject json = new JSONObject(message);
+            Map<String, Object> map = json.toMap();
+            JSONObject item = json.getJSONObject("Item");
+            System.out.println((String) map.get("orderID"));
+            String orderID = (String) map.get("orderID");
+            String username = (String) map.get("username");
+            int amount = item.getInt("amount");
+            double price = item.getDouble("price");
+            String id = item.getString("id");
+            String name = item.getString("name");
+            System.out.println("'"+orderID+"'");
+            addItem(orderID, username, new ItemAdditionParametersDTO(id, name, amount, price));
+        } catch (Throwable e) {
+            JSONObject json = new JSONObject(message);
+            JSONObject item = json.getJSONObject("Item");
+            String id = item.getString("id");
+            int amount = item.getInt("amount");
+            addItemCancelling(new ItemAdditionParametersDTO(id, amount));
+        }
     }
 
     public List<OrderDTO> list() {
-        JSONObject jo = new JSONObject();
-        JSONObject jo2 = new JSONObject();
-        jo.put("id", "1");
-        jo.put("username", "Denis");
-        jo2.put("idItem", "1");
-        jo2.put("name", "dhbwehdb");
-        jo2.put("amount", 5);
-        jo2.put("idItem", 1231.34);
-        jo.put("item", jo2);
-        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange2", "whKey", jo.toString());
         List<OrderDTO> result = new LinkedList<>();
         orderRepo.findAll().forEach(order -> result.add(order.toDTO()));
         return result;
@@ -63,21 +89,19 @@ public class OrderService {
         return orderRepo.findById(id).orElseThrow(InvalidParameterException::new).toDTO();
     }
 
-
     public OrderDTO addItem(String id, String username, ItemAdditionParametersDTO item) throws InvalidParameterException {
         try {
+            System.out.println(item);
             int idOrder = Integer.parseInt(id);
+            System.out.println(orderRepo.findById(1).orElse(new Order()));
             return orderRepo.save(
-                    orderRepo.findById(idOrder).orElseThrow(InvalidParameterException::new).addItem(item.toOrderItem())
-            ).toDTO();
-
+                    orderRepo.findById(idOrder).orElseThrow(InvalidParameterException::new).addItem(item.toOrderItem())).toDTO();
         } catch (NumberFormatException e) {
             return orderRepo.save(new Order(username, item.toOrderItem())).toDTO();
         }
     }
 
-    @Transactional
-    public OrderDTO changeStatus (Integer orderID, String status) throws Exception {
+    public OrderDTO changeStatus(Integer orderID, String status) throws Exception {
         Order order = orderRepo.findById(orderID).orElseThrow(InvalidParameterException::new);
         if (order.getStatus().nextState().contains(OrderStatus.valueOf(status.toUpperCase())))
             order.setStatus(OrderStatus.valueOf(status.toUpperCase()));

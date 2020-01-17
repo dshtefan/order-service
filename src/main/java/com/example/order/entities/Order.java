@@ -123,4 +123,16 @@ public class Order {
     public OrderDTO toDTO() {
         return new OrderDTO(this);
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "idOrder=" + idOrder +
+                ", status=" + status +
+                ", totalCost=" + totalCost +
+                ", totalAmount=" + totalAmount +
+                ", userName='" + userName + '\'' +
+                ", orderItems=" + orderItems +
+                '}';
+    }
 }

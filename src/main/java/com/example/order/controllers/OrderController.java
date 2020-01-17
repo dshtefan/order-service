@@ -3,8 +3,10 @@ package com.example.order.controllers;
 import com.example.order.dto.ItemAdditionParametersDTO;
 import com.example.order.dto.OrderDTO;
 import com.example.order.services.OrderService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +19,12 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService service;
+    private final RabbitTemplate rabbitTemplate;
     private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
-    public OrderController(OrderService service) {
+    public OrderController(OrderService service, RabbitTemplate rabbitTemplate) {
         this.service = service;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @GetMapping
@@ -37,6 +41,21 @@ public class OrderController {
         } catch (InvalidParameterException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/add")
+    public void add() {
+        logger.info("---- got add request");
+        JSONObject json = new JSONObject(); // { orderID, username, Item: {amount, price, id, name} }
+        JSONObject item = new JSONObject();
+        json.put("orderID", "3");
+        json.put("username", "denis");
+        item.put("amount", 1);
+        item.put("price", 2.0);
+        item.put("id", "213d");
+        item.put("name", "item");
+        json.put("Item", item);
+        rabbitTemplate.convertAndSend("WarehouseReserveItemsExchange", "whKey", json.toString());
     }
 
     @PostMapping("/addition")

@@ -8,11 +8,20 @@ public class ItemAdditionParametersDTO {
     private int amount;
     private double price;
 
+    public ItemAdditionParametersDTO() {
+        super();
+    }
+
     public ItemAdditionParametersDTO(String idItem, String name, int amount, double price) {
         this.idItem = idItem;
         this.name = name;
         this.amount = amount;
         this.price = price;
+    }
+
+    public ItemAdditionParametersDTO(String idItem, int amount) {
+        this.idItem = idItem;
+        this.amount = amount;
     }
 
     public String getIdItem() {

@@ -9,7 +9,7 @@ public class RabbitConfiguration {
     @Bean
     public Declarables exchanges() {
 //        DirectExchange statusQueue = new DirectExchange("StatusQueue");
-//        DirectExchange warehouseQueueReserveItems = new DirectExchange("WarehouseQueueReserveItems");
+        DirectExchange warehouseQueueReserveItems = new DirectExchange("WarehouseQueueReserveItemsExchange");
         DirectExchange warehouseQueueReserveItemsCancelled = new DirectExchange("WarehouseReserveItemsExchange2", true, false);
         Queue paymentStatus = new Queue("paymentStatus", false);
         Queue warehouseItem = new Queue("WarehouseQueueReserveItems", false);
@@ -20,10 +20,10 @@ public class RabbitConfiguration {
                 warehouseItem,
                 warehouseCancelled,
 //                statusQueue,
-//                warehouseQueueReserveItems,
+                warehouseQueueReserveItems,
                 warehouseQueueReserveItemsCancelled,
 //                BindingBuilder.bind(paymentStatus).to(statusQueue).with("pmKey"),
-//                BindingBuilder.bind(warehouseItem).to(warehouseQueueReserveItems).with("whKey"),
+                BindingBuilder.bind(warehouseItem).to(warehouseQueueReserveItems).with("whKey"),
                 BindingBuilder.bind(warehouseCancelled).to(warehouseQueueReserveItemsCancelled).with("whcKey")
         );
     }

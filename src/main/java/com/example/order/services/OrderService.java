@@ -49,6 +49,13 @@ public class OrderService {
             } else {
                 System.out.println(idOrder + " " + "FAILED");
                 changeStatus(idOrder, "FAILED");
+                orderRepo
+                        .findById(idOrder)
+                        .orElseThrow(InvalidParameterException::new)
+                        .getOrderItems()
+                        .forEach(item -> {
+                            addItemCancelling(new ItemAdditionParametersDTO(item.getIdItem(), item.getAmount()));
+                        });
             }
         } catch (Exception e) {
         }
